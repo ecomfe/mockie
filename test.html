@@ -33,52 +33,11 @@
         }
     }
 };
-var descriptor = createDescriptor(data);
-var result = getArray(descriptor);
+var descriptor = mockie.createDescriptor(data);
+var result = mockie.getArray(descriptor);
 output(result);</pre>
     <pre id="output"></pre>
     <script>
-        function createDescriptor(data) {
-            var result = {};
-            for (var name in data) {
-                if (data.hasOwnProperty(name)) {
-                    var value = data[name];
-                    if (value instanceof mockie.Generator) {
-                        value = value.createInstance();
-                    }
-                    else if (Object.prototype.toString.call(value) === '[object Object]') {
-                        value = createDescriptor(value);
-                    }
-                    result[name] = value;
-                }
-            }
-            return result;
-        }
-
-        function getSingle(descriptor) {
-            var result = {};
-            for (var name in descriptor) {
-                if (descriptor.hasOwnProperty(name)) {
-                    var value = descriptor[name];
-                    if (value instanceof mockie.Descriptor) {
-                        value = value.get();
-                    }
-                    else if (Object.prototype.toString.call(value) === '[object Object]') {
-                        value = getSingle(value);
-                    }
-                    result[name] = value;
-                }
-            }
-            return result;
-        }
-
-        function getArray(descriptor, count) {
-            var result = [];
-            for (var i = 0; i < count; i++) {
-                result.push(getSingle(descriptor));
-            }
-            return result;
-        }
 
         function output(data) {
             var s = JSON.stringify(data, null, '    ');
@@ -97,8 +56,8 @@ output(result);</pre>
                 }
             }
         };
-        var descriptor = createDescriptor(data);
-        var result = getArray(descriptor, 4);
+        var descriptor = mockie.createDescriptor(data);
+        var result = mockie.getArray(descriptor, 4);
         output(result);
     </script>
 </body>
