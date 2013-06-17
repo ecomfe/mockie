@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Hello World</title>
+    <script src="src/mockie.js"></script>
+    <script src="src/Generator.js"></script>
+    <script src="src/Descriptor.js"></script>
+    <script src="src/descriptor/Random.js"></script>
+    <script src="src/descriptor/Sequence.js"></script>
+    <script src="src/descriptor/Repeat.js"></script>
+    <style>
+        pre {
+            border: 1px solid #555;
+            float: left;
+            width: 600px;
+            height: 800px;
+            margin-right: 20px;
+            padding: 1em;
+        }
+    </style>
+</head>
+<body>
+    <pre id="input">var data = {
+    x: mockie.random.integer(1, 10000),
+    y: mockie.random.number(1, 10000),
+    z: {
+        a: mockie.sequence(3, 7),
+        b: mockie.random.inArray(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+        c: mockie.repeat.inRange(1, 4),
+        d: {
+            n: mockie.repeat.inArray(['a', 'b', 'c'])
+        }
+    }
+};
+var descriptor = createDescriptor(data);
+var result = getArray(descriptor);
+output(result);</pre>
+    <pre id="output"></pre>
+    <script>
+        function createDescriptor(data) {
+            var result = {};
+            for (var name in data) {
+                if (data.hasOwnProperty(name)) {
+                    var value = data[name];
+                    if (value instanceof mockie.Generator) {
+                        value = value.createInstance();
+                    }
+                    else if (Object.prototype.toString.call(value) === '[object Object]') {
+                        value = createDescriptor(value);
+                    }
+                    result[name] = value;
+                }
+            }
+            return result;
+        }
+
+        function getSingle(descriptor) {
+            var result = {};
+            for (var name in descriptor) {
+                if (descriptor.hasOwnProperty(name)) {
+                    var value = descriptor[name];
+                    if (value instanceof mockie.Descriptor) {
+                        value = value.get();
+                    }
+                    else if (Object.prototype.toString.call(value) === '[object Object]') {
+                        value = getSingle(value);
+                    }
+                    result[name] = value;
+                }
+            }
+            return result;
+        }
+
+        function getArray(descriptor, count) {
+            var result = [];
+            for (var i = 0; i < count; i++) {
+                result.push(getSingle(descriptor));
+            }
+            return result;
+        }
+
+        function output(data) {
+            var s = JSON.stringify(data, null, '    ');
+            document.getElementById('output').innerHTML = s;
+        }
+
+        var data = {
+            x: mockie.random.integer(1, 10000),
+            y: mockie.random.number(1, 10000),
+            z: {
+                a: mockie.sequence(3, 7),
+                b: mockie.random.inArray(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
+                c: mockie.repeat.inRange(1, 4),
+                d: {
+                    n: mockie.repeat.inArray(['a', 'b', 'c'])
+                }
+            }
+        };
+        var descriptor = createDescriptor(data);
+        var result = getArray(descriptor, 4);
+        output(result);
+    </script>
+</body>
+</html>
